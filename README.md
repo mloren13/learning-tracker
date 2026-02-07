@@ -1,69 +1,82 @@
-# Learning Tracker 🧠
+# 🚀 Learning Tracker v2
 
-A topic-agnostic learning app with spaced repetition and Socratic dialogue.
+A topic-agnostic learning companion with spaced repetition.
 
-## Features
+## What's New in v2
 
-- 📚 **Topic Management** - Create and organize learning topics
-- 🧠 **Spaced Repetition** - SM-2 algorithm for optimal memory retention
-- ❓ **Socratic Quiz Mode** - Test yourself with flashcards
-- 📊 **Progress Tracking** - Visualize your learning journey
-- 🎯 **Key Ideas & Positions** - Track your understanding and evolving views
+✅ **Templates** - Start new topics from Philosophy, Coding, Language, Book Study, or Empty  
+✅ **Export/Import** - Backup your data as JSON, move between devices  
+✅ **Search** - Find topics and cards instantly  
+✅ **Quick Add** - Add multiple cards rapidly  
+✅ **Bulk Import** - Paste cards (Front | Back format)  
+✅ **Enhanced Stats** - Mastery levels, progress bars, achievements  
+✅ **Dark/Light Mode** - Toggle in settings  
+✅ **Resource Links** - Attach articles, videos, books to topics  
+✅ **Streak Tracking** - Daily review streaks with badges  
 
-## Getting Started
+## Deploy to Vercel
 
-### Local Development
+### Auto-Deploy (Recommended)
+1. Go to https://vercel.com/new
+2. Import: **mloren13/learning-tracker**
+3. Click **Deploy**
+4. Done! URL: `https://learning-tracker.vercel.app`
 
-```bash
-npm install
-npm run dev
-```
-
-### Deployment to Vercel
-
-1. Push to GitHub:
+### Manual Update
 ```bash
 git add .
 git commit -m "Your changes"
 git push origin main
+# Vercel auto-deploys on push!
 ```
 
-2. Connect to Vercel:
-   - Go to [vercel.com](https://vercel.com)
-   - Import your GitHub repository
-   - Vercel auto-detects Vite/React and deploys
+## Features
 
-### Manual Vercel Deploy
+| Feature | Description |
+|---------|-------------|
+| 📚 **Topics** | Organize by subject (Philosophy, Coding, etc.) |
+| 🧠 **Spaced Repetition** | SM-2 algorithm for optimal memory |
+| 📋 **Templates** | Pre-built structures for common topics |
+| 📎 **Resources** | Link articles, videos, books |
+| 🔍 **Search** | Find anything instantly |
+| 📥 **Export/Import** | JSON backup, device sync |
+| 📊 **Stats** | Progress tracking, mastery levels |
+| 🎯 **Phases** | Track learning stages |
+| 🔥 **Streaks** | Daily review gamification |
 
-```bash
-npm install -g vercel
-vercel --yes
-```
+## Your Data
 
-## Usage
+- **Local Storage** - No login required, data stays on your device
+- **Export anytime** - Download JSON backup
+- **Import easily** - Paste JSON to restore
 
-1. **Create a Topic** - Click "+ New Topic" and name your learning subject
-2. **Add Entry Questions** - Core questions you're exploring
-3. **Record Your Positions** - Track your evolving views
-4. **Add Key Ideas** - Important concepts to remember
-5. **Create Flashcards** - Quiz yourself on key information
-6. **Review Daily** - Spaced repetition keeps knowledge fresh
+## Quick Start
+
+1. **Create a Topic** - Choose a template or start empty
+2. **Add Key Ideas** - What you want to remember
+3. **Create Cards** - Question/Answer flashcards
+4. **Review Daily** - Spaced repetition keeps knowledge fresh
+
+## Keyboard Shortcuts
+
+- `Ctrl/Cmd + F` - Search
+- Quick Add mode for bulk card creation
 
 ## Tech Stack
 
 - React + Vite
-- LocalStorage for data persistence
 - Recharts for statistics
-- PWA-ready for mobile
+- LocalStorage persistence
+- PWA-ready
 
 ## Roadmap
 
-- [ ] Cloud sync across devices
-- [ ] Export/Import data
+- [ ] Cloud sync (optional)
+- [ ] Mobile app
+- [ ] Connection visualizer
 - [ ] Progress sharing
-- [ ] Mobile app (React Native)
-- [ ] AI-powered study suggestions
 
-## License
+---
 
-MIT
+**Your app URL:** https://learning-tracker.vercel.app  
+**Repo:** https://github.com/mloren13/learning-tracker
