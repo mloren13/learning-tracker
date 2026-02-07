@@ -25,6 +25,8 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app {
@@ -430,6 +432,68 @@ body {
   font-size: 0.85rem;
   resize: vertical;
   min-height: 50px;
+}
+
+/* Positions Section - Improved */
+.positions-section {
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.positions-section h3 {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.positions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.position-card {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.position-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid var(--border);
+}
+
+.position-icon {
+  font-size: 1rem;
+}
+
+.position-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--accent);
+}
+
+.position-content {
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  min-height: 50px;
+}
+
+.position-content:focus {
+  outline: none;
+  background: rgba(99, 102, 241, 0.05);
 }
 
 /* Resources */
@@ -1172,6 +1236,12 @@ hr {
   .header {
     flex-direction: column;
     gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .header-left {
+    width: 100%;
+    justify-content: center;
   }
 
   .header-center {
@@ -1179,26 +1249,306 @@ hr {
     width: 100%;
   }
 
+  .header h1 {
+    font-size: 1rem;
+  }
+
   .topics-view {
     grid-template-columns: 1fr;
   }
 
   .topics-sidebar {
-    position: static;
-    max-height: 150px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    max-height: 120px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .new-topic-btn {
+    width: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  .topic-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .topic-item {
+    white-space: nowrap;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .topic-name {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topic-content {
+    padding: 1rem;
+  }
+
+  .topic-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .topic-title-row {
+    width: 100%;
+  }
+
+  .topic-big-icon {
+    font-size: 1.5rem;
+  }
+
+  .topic-title-input {
+    font-size: 1.25rem;
+    width: calc(100% - 40px);
+  }
+
+  .topic-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .action-btn, .delete-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
   }
 
   .topic-sections {
     grid-template-columns: 1fr;
   }
 
+  .topic-section {
+    padding: 1rem;
+  }
+
+  /* Mobile - Stack entry questions and key ideas horizontally if space */
+  .entry-question, .key-idea {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .idea-number {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+
+  /* Phases - Horizontal scroll */
+  .phases-track {
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .phase-step {
+    min-width: 90px;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .phase-name {
+    font-size: 0.75rem;
+  }
+
+  /* Quick Review */
+  .quick-review {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .review-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Flashcard - Full screen on mobile */
+  .flashcard {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .card-front, .card-back {
+    padding: 1rem;
+  }
+
+  .card-front p, .card-back p {
+    font-size: 1.1rem;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .show-answer-btn, .grade-btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  /* Stats */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
   .charts-row {
     grid-template-columns: 1fr;
   }
 
-  .nav {
+  /* Search */
+  .search-results {
+    width: calc(100% - 2rem);
+    left: 1rem;
+    transform: none;
+  }
+
+  /* Modal */
+  .modal {
+    padding: 1.25rem;
+    margin: 1rem;
+  }
+
+  .template-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Charts */
+  .chart-card {
+    padding: 1rem;
+  }
+
+  .topic-progress-row {
+    gap: 0.5rem;
+  }
+
+  .topic-progress-name {
+    min-width: 60px;
+    font-size: 0.8rem;
+  }
+
+  /* Add card area */
+  .add-card-actions {
+    flex-direction: column;
+  }
+
+  .quick-add-btn, .bulk-btn {
     width: 100%;
-    justify-content: center;
+  }
+
+  /* Positions - Full width on mobile */
+  .positions-section {
+    padding: 1rem;
+  }
+
+  .position-card {
+    margin-bottom: 0.75rem;
+  }
+
+  .position-content {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* Resources */
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .resource-type {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  /* All cards preview */
+  .mini-card {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .mini-card-front {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Settings */
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .badge {
+    padding: 0.6rem;
+  }
+
+  .badge-icon {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .nav button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .streak-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .main {
+    padding: 1rem;
+  }
+
+  .topic-big-icon {
+    font-size: 1.25rem;
+  }
+
+  .topic-title-input {
+    font-size: 1.1rem;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

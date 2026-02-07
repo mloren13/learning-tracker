@@ -433,14 +433,30 @@ function App() {
                     <button className="add-btn" onClick={addEntryQuestion}>+ Add Question</button>
                   </section>
 
-                  <section className="topic-section">
+                  <section className="topic-section positions-section">
                     <h3>🎯 My Positions</h3>
-                    {Object.entries(selectedTopic.positions).map(([key, value]) => (
-                      <div key={key} className="position-field">
-                        <label>{key}</label>
-                        <textarea value={value} onChange={(e) => updatePosition(key, e.target.value)} placeholder={`Your position on ${key}...`} />
-                      </div>
-                    ))}
+                    <div className="positions-list">
+                      {Object.entries(selectedTopic.positions).map(([key, value]) => (
+                        <div key={key} className="position-card">
+                          <div className="position-header">
+                            <span className="position-icon">{key === 'morality' ? '⚖️' : key === 'meaning' ? '🎯' : '💭'}</span>
+                            <span className="position-label">{key}</span>
+                          </div>
+                          <div 
+                            className="position-content" 
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => updatePosition(key, e.target.innerText)}
+                          >
+                            {value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="add-btn" onClick={() => {
+                      const key = prompt('Position name (e.g., free will, consciousness):')
+                      if (key) updatePosition(key, 'Your position...')
+                    }}>+ Add Position</button>
                   </section>
 
                   <section className="topic-section">
