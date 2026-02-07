@@ -1,16 +1,69 @@
-# React + Vite
+# Learning Tracker 🧠
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A topic-agnostic learning app with spaced repetition and Socratic dialogue.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📚 **Topic Management** - Create and organize learning topics
+- 🧠 **Spaced Repetition** - SM-2 algorithm for optimal memory retention
+- ❓ **Socratic Quiz Mode** - Test yourself with flashcards
+- 📊 **Progress Tracking** - Visualize your learning journey
+- 🎯 **Key Ideas & Positions** - Track your understanding and evolving views
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Local Development
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Deployment to Vercel
+
+1. Push to GitHub:
+```bash
+git add .
+git commit -m "Your changes"
+git push origin main
+```
+
+2. Connect to Vercel:
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel auto-detects Vite/React and deploys
+
+### Manual Vercel Deploy
+
+```bash
+npm install -g vercel
+vercel --yes
+```
+
+## Usage
+
+1. **Create a Topic** - Click "+ New Topic" and name your learning subject
+2. **Add Entry Questions** - Core questions you're exploring
+3. **Record Your Positions** - Track your evolving views
+4. **Add Key Ideas** - Important concepts to remember
+5. **Create Flashcards** - Quiz yourself on key information
+6. **Review Daily** - Spaced repetition keeps knowledge fresh
+
+## Tech Stack
+
+- React + Vite
+- LocalStorage for data persistence
+- Recharts for statistics
+- PWA-ready for mobile
+
+## Roadmap
+
+- [ ] Cloud sync across devices
+- [ ] Export/Import data
+- [ ] Progress sharing
+- [ ] Mobile app (React Native)
+- [ ] AI-powered study suggestions
+
+## License
+
+MIT
