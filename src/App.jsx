@@ -1,680 +1,393 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import './App.css'
 
 const STORAGE_KEY = 'learning-tracker-data'
 
 const defaultData = {
-  topics: [
-    {
-      id: 'philosophy',
-      name: 'Philosophy',
-      description: 'Deep exploration of fundamental questions',
-      phase: 2,
-      status: 'in_progress',
-      color: '#6366f1',
-      icon: '🧠',
-      entryQuestions: [
-        { id: 'q1', text: 'What is good? (fixed vs relative)' },
-        { id: 'q2', text: 'What is meaning? (found vs created)' }
-      ],
-      positions: {
-        morality: 'Contextual relativism. We\'re shaped by context but can still condemn within our own context.',
-        meaning: 'Found, not chosen. We discover what resonates. But we choose whether to look.'
-      },
-      keyIdeas: [
-        { id: 'i1', text: 'Metaphysics asks "What is real?" Ethics asks "What is good?" - Different questions.' },
-        { id: 'i2', text: 'Ethics can stand alone from metaphysics. Facts don\'t imply values.' },
-        { id: 'i3', text: 'Ontology is a subset of metaphysics: "What categories of things exist?"' }
-      ],
-      connections: [],
-      resources: [],
-      branches: ['METAPHYSICS', 'EPISTEMOLOGY', 'ETHICS', 'LOGIC', 'PHILOSOPHY OF MIND', 'AESTHETICS'],
-      phases: [
-        { id: 1, name: 'The Map', status: 'complete', description: 'Major branches and connections understood' },
-        { id: 2, name: 'Ethics Deep Dive', status: 'pending', description: 'Aristotle, Plato, Hume, Kant, Nietzsche' },
-        { id: 3, name: 'Meaning and Existence', status: 'pending', description: 'Kierkegaard, Nietzsche, Heidegger, Sartre, Camus' }
-      ],
-      streak: 0,
-      lastReview: null
-    }
-  ],
+  topics: [{
+    id: 'philosophy', name: 'Philosophy', description: 'Deep exploration of fundamental questions',
+    status: 'in_progress', icon: '🧠', isFavorite: true, streak: 5,
+    entryQuestions: [
+      { id: 'q1', text: 'What is good? (fixed vs relative)' },
+      { id: 'q2', text: 'What is meaning? (found vs created)' }
+    ],
+    positions: {
+      morality: 'Contextual relativism. We\'re shaped by context but can still condemn within our own context.',
+      meaning: 'Found, not chosen. We discover what resonates. But we choose whether to look.'
+    },
+    keyIdeas: [
+      { id: 'i1', text: 'Metaphysics asks "What is real?" Ethics asks "What is good?"' },
+      { id: 'i2', text: 'Ethics can stand alone from metaphysics. Facts don\'t imply values.' },
+      { id: 'i3', text: 'Ontology is a subset of metaphysics.' }
+    ],
+    connections: [],
+    quotes: [],
+    philosophers: [
+      { id: 'plato', name: 'Plato', idea: 'Forms/Ideas', position: 'Objective realism' },
+      { id: 'aristotle', name: 'Aristotle', idea: 'Golden mean', position: 'Virtue ethics' },
+      { id: 'kant', name: 'Kant', idea: 'Categorical imperative', position: 'Deontology' },
+      { id: 'hume', name: 'Hume', idea: 'Is-ought problem', position: 'Sentimentalism' },
+      { id: 'nietzsche', name: 'Nietzsche', idea: 'Will to power', position: 'Nihilism/Affirmation' }
+    ],
+    thoughtExperiments: [
+      { id: 't1', name: 'Trolley Problem', description: 'Pull lever to save 5 but kill 1?', implications: ['Utilitarianism vs deontology', 'Active vs passive harm'] },
+      { id: 't2', name: 'Ship of Theseus', description: 'Replaced planks = same ship?', implications: ['Personal identity', 'Continuity vs composition'] },
+      { id: 't3', name: 'Experience Machine', description: 'Infinite pleasure vs reality?', implications: ['Hedonism', 'Authenticity'] }
+    ],
+    phases: [
+      { id: 1, name: 'The Map', status: 'complete' },
+      { id: 2, name: 'Ethics Deep Dive', status: 'in_progress' },
+      { id: 3, name: 'Meaning and Existence', status: 'pending' }
+    ],
+    tags: ['philosophy', 'ethics', 'morality'],
+    createdAt: '2026-02-03'
+  }],
   cards: [
-    { id: 'c1', topicId: 'philosophy', front: 'What is the difference between Metaphysics and Ethics?', back: 'Metaphysics asks "What is real?" Ethics asks "What is good?" - Different questions, different branches.', ease: 2.5, interval: 1, nextReview: Date.now(), reviews: 0 },
-    { id: 'c2', topicId: 'philosophy', front: 'Can Ethics stand alone from Metaphysics?', back: 'Yes. Knowing metaphysical facts doesn\'t tell you moral values - you need a separate framework for ethics.', ease: 2.5, interval: 1, nextReview: Date.now(), reviews: 0 },
-    { id: 'c3', topicId: 'philosophy', front: 'What is Ontology?', back: 'A subset of metaphysics that asks "What categories of things exist?"', ease: 2.5, interval: 1, nextReview: Date.now(), reviews: 0 }
+    { id: 'c1', topicId: 'philosophy', front: 'Metaphysics vs Ethics?', back: 'Metaphysics asks "What is real?" Ethics asks "What is good?"', interval: 6, reviews: 3 },
+    { id: 'c2', topicId: 'philosophy', front: 'Ethics standalone?', back: 'Yes. Facts don\'t imply values.', interval: 6, reviews: 2 },
+    { id: 'c3', topicId: 'philosophy', front: 'What is Ontology?', back: 'Subset of metaphysics: "What categories exist?"', interval: 6, reviews: 2 }
   ],
+  quotes: [
+    { id: 'q1', text: 'The unexamined life is not worth living.', author: 'Socrates', category: 'wisdom' },
+    { id: 'q2', text: 'He who has a why can bear almost any how.', author: 'Nietzsche', category: 'meaning' },
+    { id: 'q3', text: 'Morality is how we make ourselves worthy of happiness.', author: 'Kant', category: 'ethics' }
+  ],
+  dailyPrompts: [],
   templates: [
-    { id: 't1', name: 'Philosophy', icon: '🧠', description: 'Entry questions, positions, key ideas', phases: ['The Map', 'Deep Dive', 'Synthesis'] },
-    { id: 't2', name: 'Coding', icon: '💻', description: 'Concepts, syntax, projects', phases: ['Basics', 'Practice', 'Build'] },
-    { id: 't3', name: 'Language', icon: '🌍', description: 'Vocabulary, grammar, conversation', phases: ['Foundation', 'Expansion', 'Fluency'] },
-    { id: 't4', name: 'Book Study', icon: '📚', description: 'Notes, insights, questions', phases: ['Reading', 'Reflection', 'Application'] },
-    { id: 't5', name: 'Empty', icon: '📝', description: 'Start from scratch', phases: [] }
+    { id: 't1', name: 'Philosophy', icon: '🧠', phases: ['The Map', 'Deep Dive', 'Synthesis'] },
+    { id: 't2', name: 'Coding', icon: '💻', phases: ['Basics', 'Practice', 'Build'] },
+    { id: 't3', name: 'Language', icon: '🌍', phases: ['Foundation', 'Expansion', 'Fluency'] },
+    { id: 't4', name: 'Book Study', icon: '📚', phases: ['Reading', 'Reflection', 'Application'] },
+    { id: 't5', name: 'Empty', icon: '📝', phases: [] }
   ],
-  sessions: [],
-  settings: {
-    darkMode: true,
-    dailyGoal: 10,
-    notifications: false
-  },
-  badges: {
-    streakDays: 0,
-    totalCards: 0,
-    topicsCreated: 0,
-    totalReviews: 0
-  }
+  settings: { darkMode: true, dailyGoal: 10, keyboardShortcuts: true },
+  badges: { streakDays: 5, totalCards: 3, topicsCreated: 1, quotesSaved: 3, experimentsTried: 0 }
 }
 
-function App() {
+export default function App() {
   const [data, setData] = useState(defaultData)
-  const [activeTab, setActiveTab] = useState('topics')
-  const [selectedTopic, setSelectedTopic] = useState(null)
+  const [tab, setTab] = useState('topics')
+  const [topic, setTopic] = useState(null)
   const [quizMode, setQuizMode] = useState(false)
-  const [quizCardIndex, setQuizCardIndex] = useState(0)
-  const [showAnswer, setShowAnswer] = useState(false)
-  const [showAddResource, setShowAddResource] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showTemplateModal, setShowTemplateModal] = useState(false)
-  const [exportModal, setExportModal] = useState(false)
-  const [importText, setImportText] = useState('')
-  const [quickAddMode, setQuickAddMode] = useState(false)
-  const [streakModal, setStreakModal] = useState(false)
+  const [quizIdx, setQuizIdx] = useState(0)
+  const [showAns, setShowAns] = useState(false)
+  const [search, setSearch] = useState('')
+  const [showModal, setShowModal] = useState(null)
+  const [undoStack, setUndoStack] = useState([])
+  const [notif, setNotif] = useState(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setData(parsed)
-        if (parsed.topics?.length > 0) {
-          setSelectedTopic(parsed.topics[0])
-        }
-      } catch (e) {
-        console.error('Failed to load:', e)
-      }
-    }
+    const s = localStorage.getItem(STORAGE_KEY)
+    if (s) { try { const p = JSON.parse(s); setData(p); if (p.topics?.[0]) setTopic(p.topics[0]) } catch {} }
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  }, [data])
+  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) }, [data])
 
-  useEffect(() => {
-    if (data.badges?.streakDays > 0 && data.badges?.streakDays % 7 === 0 && !streakModal) {
-      setStreakModal(true)
-    }
-  }, [data.badges])
+  const notifShow = (m) => { setNotif(m); setTimeout(() => setNotif(null), 3000) }
 
-  const gradeCard = (cardId, quality) => {
-    const card = data.cards.find(c => c.id === cardId)
-    if (!card) return
+  const pushUndo = (act) => { setUndoStack(u => [...u.slice(-4), act]) }
+  const doUndo = () => { if (undoStack.length) { undoStack[undoStack.length-1]?.(); setUndoStack(u => u.slice(0,-1)); notifShow('Undo') } }
 
-    let newEase = Math.max(1.3, card.ease + (quality - 3) * 0.1)
-    let newInterval = card.interval
-
-    if (quality >= 3) {
-      if (card.interval === 1) newInterval = 6
-      else if (card.interval < 30) newInterval = Math.round(card.interval * newEase)
-      else newInterval = Math.round(card.interval * newEase * 1.2)
-    } else {
-      newInterval = 1
-      newEase = Math.max(1.3, newEase - 0.2)
-    }
-
-    const updatedCards = data.cards.map(c =>
-      c.id === cardId ? { ...c, ease: newEase, interval: newInterval, nextReview: Date.now() + newInterval * 24 * 60 * 60 * 1000, reviews: (c.reviews || 0) + 1 } : c
-    )
-
+  const grade = (id, q) => {
+    const c = data.cards.find(x => x.id === id)
+    if (!c) return
+    let int = c.interval, eas = Math.max(1.3, c.ease + (q-3)*0.1)
+    if (q >= 3) { int = c.interval===1 ? 6 : Math.round(c.interval * eas) }
+    else { int = 1; eas = Math.max(1.3, eas-0.2) }
+    const up = data.cards.map(x => x.id===id ? {...x, interval: int, ease: eas, reviews: (x.reviews||0)+1, nextReview: Date.now()+int*86400000} : x)
     const today = new Date().toDateString()
-    const lastReview = data.topics.find(t => t.id === selectedTopic?.id)?.lastReview
-    const updatedTopics = data.topics.map(t => {
-      if (t.id === selectedTopic?.id) {
-        const isSameDay = lastReview === today
-        return { ...t, lastReview: today, streak: isSameDay ? t.streak : t.streak + 1 }
-      }
+    const upd = data.topics.map(t => {
+      if (t.id === topic?.id) return {...t, lastReview: today, streak: t.lastReview===today ? t.streak : t.streak+1}
       return t
     })
-
-    setData({ ...data, cards: updatedCards, topics: updatedTopics })
-
-    const topicCards = data.cards.filter(c => c.topicId === selectedTopic.id && c.nextReview <= Date.now())
-    const nextIndex = quizCardIndex + 1
-    if (nextIndex < topicCards.length) {
-      setQuizCardIndex(nextIndex)
-      setShowAnswer(false)
-    } else {
-      setQuizMode(false)
-      setQuizCardIndex(0)
-      setShowAnswer(false)
-    }
+    setData({...data, cards: up, topics: upd})
+    const due = data.cards.filter(x => x.topicId===topic.id && x.nextReview<=Date.now())
+    if (quizIdx+1 < due.length) { setQuizIdx(quizIdx+1); setShowAns(false) }
+    else { setQuizMode(false); setQuizIdx(0); setShowAns(false); notifShow('All caught up!') }
   }
 
-  const addCard = (front, back) => {
-    if (!front.trim() || !back.trim() || !selectedTopic) return
-    const newCard = {
-      id: 'c' + Date.now(),
-      topicId: selectedTopic.id,
-      front,
-      back,
-      ease: 2.5,
-      interval: 1,
-      nextReview: Date.now(),
-      reviews: 0
-    }
-    setData({ ...data, cards: [...data.cards, newCard], badges: { ...data.badges, totalCards: data.badges.totalCards + 1 } })
+  const addCard = (f, b) => {
+    if (!f||!b||!topic) return
+    pushUndo(() => setData(d => ({...d, cards: d.cards.slice(0,-1)})))
+    setData(d => ({...d, cards: [...d.cards, {id:'c'+Date.now(), topicId:topic.id, front:f, back:b, interval:1, reviews:0}]}))
+    notifShow('Card added')
   }
 
-  const createTopic = (template = null) => {
-    const name = template ? template.name : prompt('Topic name:')
+  const cloneCard = (id) => {
+    const c = data.cards.find(x => x.id===id)
+    if (!c) return
+    setData(d => ({...d, cards: [...d.cards, {...c, id:'c'+Date.now(), interval:1, reviews:0}]}))
+    notifShow('Card cloned')
+  }
+
+  const delCard = (id) => {
+    pushUndo(() => setData(d => ({...d, cards: [...d.cards, data.cards.find(x=>x.id===id)]})))
+    setData(d => ({...d, cards: d.cards.filter(x => x.id!==id)}))
+    notifShow('Card deleted')
+  }
+
+  const createTopic = (tpl=null) => {
+    const name = tpl?.name || prompt('Topic name:')
     if (!name) return
-
-    const newTopic = {
-      id: 't' + Date.now(),
-      name,
-      description: template?.description || '',
-      phase: 1,
-      status: 'not_started',
-      color: template?.color || '#6366f1',
-      icon: template?.icon || '📚',
-      entryQuestions: [],
-      positions: {},
-      keyIdeas: [],
-      connections: [],
-      resources: [],
-      branches: [],
-      phases: (template?.phases || ['Getting Started']).map((p, i) => ({ id: i + 1, name: p, status: 'pending', description: '' })),
-      streak: 0,
-      lastReview: null
+    const nt = {
+      id: 't'+Date.now(), name, description: tpl?.description||'', status:'not_started', icon:tpl?.icon||'📚',
+      isFavorite:false, streak:0, entryQuestions:[], positions:{}, keyIdeas:[], connections:[], quotes:[], philosophers:[], thoughtExperiments:[],
+      phases: (tpl?.phases||['Getting Started']).map((n,i)=>({id:i+1, name:n, status:'pending'})),
+      tags:[], createdAt:new Date().toISOString()
     }
+    pushUndo(() => setData(d => ({...d, topics: d.topics.slice(0,-1)})))
+    setData(d => ({...d, topics: [...d.topics, nt]}))
+    setTopic(nt)
+    setShowModal(null)
+    notifShow('Topic created')
+  }
 
-    setData({
-      ...data,
-      topics: [...data.topics, newTopic],
-      badges: { ...data.badges, topicsCreated: data.badges.topicsCreated + 1 }
+  const updTopic = (f, v) => {
+    if (!topic) return
+    pushUndo(() => {
+      const old = data.topics.find(x=>x.id===topic.id)
+      setData(d => ({...d, topics: d.topics.map(t=>t.id===topic.id?old:t)}))
     })
-    setSelectedTopic(newTopic)
-    setShowTemplateModal(false)
+    setData(d => ({...d, topics: d.topics.map(t=>t.id===topic.id?{...t,[f]:v}:t)}))
+    setTopic({...topic, [f]:v})
   }
 
-  const updateTopic = (field, value) => {
-    if (!selectedTopic) return
-    const updatedTopics = data.topics.map(t => t.id === selectedTopic.id ? { ...t, [field]: value } : t)
-    setData({ ...data, topics: updatedTopics })
-    setSelectedTopic({ ...selectedTopic, [field]: value })
+  const addIdea = () => {
+    const txt = prompt('Key idea:')
+    if (!txt||!topic) return
+    updTopic('keyIdeas', [...topic.keyIdeas, {id:'i'+Date.now(), text:txt}])
   }
 
-  const addEntryQuestion = () => {
-    const text = prompt('Entry question:')
-    if (!text || !selectedTopic) return
-    updateTopic('entryQuestions', [...selectedTopic.entryQuestions, { id: 'q' + Date.now(), text }])
+  const addConn = () => {
+    if (topic.keyIdeas.length<2) return alert('Need 2+ ideas')
+    const f = parseInt(prompt('From #:\n'+topic.keyIdeas.map((x,i)=>`${i+1}. ${x.text.slice(0,40)}...`).join('\n')))
+    const t = parseInt(prompt('To #:'))
+    const l = prompt('Connection (builds on/contrasts/leads to):') || 'connects'
+    if (f && t) updTopic('connections', [...(topic.connections||[]), {
+      id:'conn'+Date.now(), from:topic.keyIdeas[f-1]?.id, to:topic.keyIdeas[t-1]?.id, 
+      fromName:topic.keyIdeas[f-1]?.text, toName:topic.keyIdeas[t-1]?.text, label:l
+    }])
   }
 
-  const addKeyIdea = () => {
-    const text = prompt('Key idea:')
-    if (!text || !selectedTopic) return
-    updateTopic('keyIdeas', [...selectedTopic.keyIdeas, { id: 'i' + Date.now(), text }])
+  const addQuote = () => {
+    const txt = prompt('Quote:')
+    if (!txt) return
+    const auth = prompt('Author:')||'Unknown'
+    const cat = prompt('Category (wisdom/ethics/meaning/other):')||'other'
+    setData(d => ({...d, quotes: [...d.quotes, {id:'q'+Date.now(), topicId:topic?.id, text:txt, author:auth, category:cat}]}))
+    notifShow('Quote saved')
   }
 
-  const addResource = () => {
-    const title = prompt('Resource title:')
-    if (!title) return
-    const url = prompt('URL (optional):') || ''
-    const type = prompt('Type (article/video/book/link):') || 'link'
-    updateTopic('resources', [...(selectedTopic.resources || []), { id: 'r' + Date.now(), title, url, type }])
-    setShowAddResource(false)
+  const addPhil = () => {
+    const n = prompt('Philosopher:')
+    if (!n) return
+    const i = prompt('Key idea:')
+    const p = prompt('Position:')
+    updTopic('philosophers', [...(topic.philosophers||[]), {id:'p'+Date.now(), name:n, idea:i, position:p}])
   }
 
-  const updatePosition = (key, value) => {
-    if (!selectedTopic) return
-    updateTopic('positions', { ...selectedTopic.positions, [key]: value })
+  const addExp = () => {
+    const n = prompt('Experiment name:')
+    if (!n) return
+    const d = prompt('Description:')
+    const imp = prompt('Implications (comma):')
+    setData(d => ({...d, thoughtExperiments: [...d.thoughtExperiments, {id:'e'+Date.now(), topicId:topic?.id, name:n, description:d, implications:imp.split(',').map(x=>x.trim())}]}))
+    notifShow('Experiment added')
   }
 
-  const deleteTopic = (topicId) => {
-    if (!confirm('Delete this topic and all cards?')) return
-    const updatedTopics = data.topics.filter(t => t.id !== topicId)
-    const updatedCards = data.cards.filter(c => c.topicId !== topicId)
-    setData({ ...data, topics: updatedTopics, cards: updatedCards })
-    if (selectedTopic?.id === topicId) {
-      setSelectedTopic(updatedTopics[0] || null)
-    }
+  const addTag = () => {
+    const t = prompt('Tag:')
+    if (!t||!topic||topic.tags?.includes(t)) return
+    updTopic('tags', [...(topic.tags||[]), t])
   }
 
-  const getDueCards = () => {
-    if (!selectedTopic) return []
-    return data.cards.filter(c => c.topicId === selectedTopic.id && c.nextReview <= Date.now())
+  const delTopic = (id) => {
+    if (!confirm('Delete topic?')) return
+    pushUndo(() => setData(d => ({...d, topics: [...d.topics, data.topics.find(x=>x.id===id)]})))
+    setData(d => ({...d, topics: d.topics.filter(t=>t.id!==id), cards: d.cards.filter(c=>c.topicId!==id)}))
+    if (topic?.id===id) setTopic(data.topics[0]||null)
   }
 
-  const getAllDueCards = () => {
-    return data.cards.filter(c => c.nextReview <= Date.now())
+  const expData = () => {
+    const b = new Blob([JSON.stringify({exportDate:new Date().toISOString(), version:'2.0', data}, null, 2)],{type:'application/json'})
+    const u = URL.createObjectURL(b)
+    const a = document.createElement('a'); a.href=u; a.download=`learn-${new Date().toISOString().split('T')[0]}.json`; a.click()
+    setShowModal(null); notifShow('Exported')
   }
 
-  const exportData = () => {
-    const exportObj = { exportDate: new Date().toISOString(), version: '1.0', data }
-    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `learning-tracker-${new Date().toISOString().split('T')[0]}.json`
-    a.click()
-    setExportModal(false)
+  const impData = () => {
+    try { const p = JSON.parse(prompt('Paste JSON:')||'')
+      if (p.data?.topics) { setData(p.data); setTopic(p.data.topics[0]||null); setShowModal(null); notifShow('Imported') }
+      else alert('Invalid')
+    } catch(e) { alert('Error: '+e.message) }
   }
 
-  const importData = () => {
-    try {
-      const parsed = JSON.parse(importText)
-      if (parsed.data && parsed.data.topics) {
-        setData(parsed.data)
-        setSelectedTopic(parsed.data.topics[0] || null)
-        setImportText('')
-        setExportModal(false)
-        alert('Import successful!')
-      } else {
-        alert('Invalid format')
+  const due = topic ? data.cards.filter(x=>x.topicId===topic.id && x.nextReview<=Date.now()) : []
+  const allDue = data.cards.filter(x=>x.nextReview<=Date.now())
+
+  const results = search ? [...data.topics.filter(t=>t.name.toLowerCase().includes(search.toLowerCase())), ...data.cards.filter(c=>c.front.toLowerCase().includes(search.toLowerCase())), ...data.quotes.filter(q=>q.text.toLowerCase().includes(search.toLowerCase()))] : []
+
+  useEffect(() => {
+    if (!data.settings.keyboardShortcuts) return
+    const k = (e) => {
+      if (e.ctrlKey||e.metaKey) {
+        if (e.key==='z') { e.preventDefault(); doUndo() }
+        if (e.key==='f') { e.preventDefault(); document.querySelector('.sb')?.focus() }
+        if (e.key==='n') { e.preventDefault(); setShowModal('template') }
       }
-    } catch (e) {
-      alert('Failed to import: ' + e.message)
     }
-  }
-
-  const bulkImportCards = () => {
-    const text = prompt('Paste cards (Front | Back, one per line):')
-    if (!text) return
-    const lines = text.split('\n').filter(l => l.includes('|'))
-    lines.forEach(line => {
-      const [front, back] = line.split('|').map(s => s.trim())
-      if (front && back) addCard(front, back)
-    })
-  }
-
-  const searchResults = searchQuery ? [
-    ...data.topics.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    ...data.cards.filter(c => c.front.toLowerCase().includes(searchQuery.toLowerCase()) || c.back.toLowerCase().includes(searchQuery.toLowerCase()))
-  ] : []
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [data.settings, undoStack])
 
   return (
-    <div className={`app ${data.settings.darkMode ? 'dark' : 'light'}`}>
-      {streakModal && (
-        <div className="modal-overlay" onClick={() => setStreakModal(false)}>
-          <div className="modal streak-modal" onClick={e => e.stopPropagation()}>
-            <h2>🔥 {data.badges.streakDays} Day Streak!</h2>
-            <p>You're on fire! Keep it up!</p>
-            <button onClick={() => setStreakModal(false)}>Thanks!</button>
-          </div>
-        </div>
-      )}
+    <div className={`app ${data.settings.darkMode?'dark':'light'}`}>
+      {notif && <div className="notif">{notif}</div>}
+      {undoStack.length>0 && <button className="undo" onClick={doUndo}>↩️</button>}
+      {data.badges.streakDays%7===0 && data.badges.streakDays>0 && <div className="modal" onClick={()=>{}}><h2>🔥 {data.badges.streakDays} Day Streak!</h2><p>You're on fire!</p></div>}
+      
+      {showModal==='template' && <div className="modal" onClick={()=>setShowModal(null)}>
+        <h2>Create Topic</h2>
+        <div className="tplg">{data.templates.map(t=><div key={t.id} className="tpl" onClick={()=>createTopic(t)}><span>{t.icon}</span><b>{t.name}</b></div>)}</div>
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
 
-      {showTemplateModal && (
-        <div className="modal-overlay" onClick={() => setShowTemplateModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Create New Topic</h2>
-            <div className="template-grid">
-              {data.templates.map(t => (
-                <div key={t.id} className="template-card" onClick={() => createTopic(t)}>
-                  <span className="template-icon">{t.icon}</span>
-                  <h3>{t.name}</h3>
-                  <p>{t.description}</p>
-                </div>
-              ))}
-            </div>
-            <button className="cancel-btn" onClick={() => setShowTemplateModal(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
+      {showModal==='export' && <div className="modal" onClick={()=>setShowModal(null)}>
+        <h2>Export / Import</h2>
+        <button onClick={expData}>📥 Export</button>
+        <button onClick={impData}>📤 Import</button>
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
 
-      {exportModal && (
-        <div className="modal-overlay" onClick={() => setExportModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Export / Import</h2>
-            <div className="export-section">
-              <button className="export-btn" onClick={exportData}>📥 Export Data (JSON)</button>
-              <p className="export-info">Download all your topics, cards, and progress</p>
-            </div>
-            <hr />
-            <div className="import-section">
-              <h3>Import</h3>
-              <textarea placeholder='Paste JSON here...' value={importText} onChange={e => setImportText(e.target.value)} />
-              <button className="import-btn" onClick={importData}>📤 Import Data</button>
-            </div>
-            <button className="cancel-btn" onClick={() => setExportModal(false)}>Close</button>
-          </div>
-        </div>
-      )}
+      {showModal==='compare' && topic && <div className="modal big" onClick={()=>setShowModal(null)}>
+        <h2>⚖️ Compare</h2>
+        {Object.entries(topic.positions).map(([k,v])=><div key={k}><h3>{k}</h3><p className="pos">{v}</p><div className="philg">{topic.philosophers?.map(p=><div key={p.id}><b>{p.name}</b><i>{p.position}</i></div>)}</div></div>)}
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
 
-      <header className="header">
-        <div className="header-left">
-          <h1>🧠 Learning Tracker</h1>
-          {data.badges.streakDays > 0 && <span className="streak-badge">🔥 {data.badges.streakDays} day streak</span>}
-        </div>
-        <div className="header-center">
-          <input type="text" className="search-bar" placeholder="🔍 Search topics, cards..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-        </div>
-        <nav className="nav">
-          <button className={activeTab === 'topics' ? 'active' : ''} onClick={() => setActiveTab('topics')}>Topics</button>
-          <button className={activeTab === 'review' ? 'active' : ''} onClick={() => setActiveTab('review')}>Review {getAllDueCards().length > 0 && `(${getAllDueCards().length})`}</button>
-          <button className={activeTab === 'stats' ? 'active' : ''} onClick={() => setActiveTab('stats')}>Stats</button>
-          <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>⚙️</button>
-        </nav>
+      {showModal==='quotes' && <div className="modal" onClick={()=>setShowModal(null)}>
+        <h2>📜 Quotes</h2>
+        <button onClick={addQuote}>+ Add</button>
+        <div className="ql">{data.quotes.map(q=><div key={q.id}><i>"{q.text}"</i><b>— {q.author}</b></div>)}</div>
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
+
+      {showModal==='experiments' && <div className="modal" onClick={()=>setShowModal(null)}>
+        <h2>🧪 Experiments</h2>
+        <button onClick={addExp}>+ Add</button>
+        <div className="exlg">{data.thoughtExperiments.map(e=><div key={e}><b>{e.name}</b><p>{e.description}</p><div className="tagg">{e.implications?.map((x,i)=><span key={i}>{x}</span>)}</div></div>)}</div>
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
+
+      {showModal==='connections' && topic && <div className="modal" onClick={()=>setShowModal(null)}>
+        <h2>🔗 Connections</h2>
+        {topic.connections?.map(c=><div key={c.id}><span>{c.fromName?.slice(0,30)}...</span><b>{c.label}</b><span>{c.toName?.slice(0,30)}...</span></div>)}
+        <button onClick={()=>setShowModal(null)}>✕</button>
+      </div>}
+
+      <header className="hdr">
+        <h1>🧠 Learning Tracker</h1>
+        <input className="sb" placeholder="🔍 Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <nav>{['topics','review','stats','tools'].map(t=><button key={t} className={tab===t?'act':''} onClick={()=>setTab(t)}>{t}</button>)}</nav>
       </header>
 
-      {searchQuery && (
-        <div className="search-results">
-          {searchResults.length > 0 ? searchResults.map((r, i) => (
-            <div key={i} className="search-result-item" onClick={() => {
-              if (r.front) { setSelectedTopic(data.topics.find(t => t.id === r.topicId)); setActiveTab('review'); }
-              else { setSelectedTopic(r); }
-              setSearchQuery('');
-            }}>
-              <span>{r.icon || '📚'}</span>
-              <span>{r.name || r.front?.slice(0, 50)}</span>
-            </div>
-          )) : <div className="search-no-results">No results</div>}
-        </div>
-      )}
+      {search && <div className="sr">
+        {results.map((r,i)=><div key={i} onClick={()=>{if(r.front){setTopic(data.topics.find(x=>x.id===r.topicId));setTab('review')}else{setTopic(r)};setSearch('')}}>{r.icon||'📚'}{r.name||r.front?.slice(0,50)}</div>)}
+      </div>}
 
       <main className="main">
-        {activeTab === 'topics' && (
-          <div className="topics-view">
-            <div className="topics-sidebar">
-              <button className="new-topic-btn" onClick={() => setShowTemplateModal(true)}>+ New Topic</button>
-              <div className="topic-list">
-                {data.topics.map(topic => (
-                  <div key={topic.id} className={`topic-item ${selectedTopic?.id === topic.id ? 'selected' : ''}`} onClick={() => { setSelectedTopic(topic); setQuizMode(false); }}>
-                    <span className="topic-icon">{topic.icon}</span>
-                    <span className="topic-name">{topic.name}</span>
-                    <span className={`topic-status ${topic.status}`}>{topic.streak > 0 && `🔥${topic.streak}`}</span>
-                  </div>
-                ))}
+        {tab==='topics' && <div className="tv">
+          <aside className="sb">
+            <button onClick={()=>setShowModal('template')}>+ New</button>
+            {data.topics.map(t=><div key={t.id} className={topic?.id===t.id?'sel':''} onClick={()=>{setTopic(t);setQuizMode(false)}}>{t.isFavorite?'⭐':t.icon}{t.name}{t.streak>0&&` 🔥${t.streak}`}</div>)}
+          </aside>
+          {topic ? <div className="tc">
+            <div className="th">
+              <span className="bi">{topic.icon}</span>
+              <input value={topic.name} onChange={e=>updTopic('name',e.target.value)} />
+              <div className="btns">
+                <button onClick={()=>updTopic('isFavorite',!topic.isFavorite)}>{topic.isFavorite?'⭐':'☆'}</button>
+                <button onClick={addTag}>🏷️</button>
+                <button onClick={()=>setShowModal('connections')}>🔗</button>
+                <button onClick={()=>setShowModal('compare')}>⚖️</button>
+                <button onClick={()=>setShowModal('quotes')}>📜</button>
+                <button onClick={()=>setShowModal('experiments')}>🧪</button>
+                <button onClick={()=>delTopic(topic.id)}>🗑️</button>
               </div>
             </div>
+            {topic.tags?.length>0 && <div className="tg">{topic.tags.map((x,i)=><span key={i}>{x}</span>)}</div>}
+            <textarea value={topic.description||''} onChange={e=>updTopic('description',e.target.value)} placeholder="Description..." />
+            
+            <div className="secg">
+              <section><h3>🎯 Positions</h3>{Object.entries(topic.positions).map(([k,v])=><div key={k}><b>{k}</b><div contentEditable onBlur={e=>updTopic('positions',{...topic.positions,[k]:e.target.innerText})}>{v}</div></div>)}</section>
+              <section><h3>❓ Questions</h3>{topic.entryQuestions.map(q=><div key={q.id}>❓ {q.text}</div>)}<button onClick={()=>updTopic('entryQuestions',[...topic.entryQuestions,{id:'q'+Date.now(),text:prompt('Question:')||''}])}>+ Add</button></section>
+              <section><h3>💡 Ideas</h3>{topic.keyIdeas.map((x,i)=><div key={x.id}><span>{i+1}</span>{x.text}</div>)}<button onClick={addIdea}>+ Add</button></section>
+            </div>
 
-            {selectedTopic ? (
-              <div className="topic-content">
-                <div className="topic-header">
-                  <div className="topic-title-row">
-                    <span className="topic-big-icon">{selectedTopic.icon}</span>
-                    <input type="text" className="topic-title-input" value={selectedTopic.name} onChange={(e) => updateTopic('name', e.target.value)} />
-                  </div>
-                  <div className="topic-actions">
-                    <button className="action-btn" onClick={addResource}>+ Resource</button>
-                    <button className="action-btn" onClick={bulkImportCards}>📋 Bulk Import</button>
-                    <button className="delete-btn" onClick={() => deleteTopic(selectedTopic.id)}>Delete</button>
-                  </div>
-                </div>
+            {topic.philosophers?.length>0 && <section><h3>👤 Philosophers</h3><div className="pg">{topic.philosophers.map(p=><div key={p.id}><b>{p.name}</b><i>{p.position}</i></div>)}</div><button onClick={addPhil}>+ Add</button></section>}
 
-                <div className="topic-meta">
-                  <select value={selectedTopic.status} onChange={(e) => updateTopic('status', e.target.value)}>
-                    <option value="not_started">Not Started</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="complete">Complete</option>
-                  </select>
-                  <input type="text" className="icon-picker" value={selectedTopic.icon} onChange={(e) => updateTopic('icon', e.target.value)} maxLength={2} placeholder="📚" />
-                </div>
+            <section><h3>📊 Phases</h3><div className="phg">{topic.phases?.map((p,i)=><div key={p.id} className={p.status}><span>{p.status==='complete'?'✓':i+1}</span>{p.name}<select value={p.status} onChange={e=>updTopic('phases',topic.phases.map(x=>x.id===p.id?{...x,status:e.target.value}:x))}><option value="pending">Pending</option><option value="in_progress">→</option><option value="complete">✓</option></select></div>)}</div></section>
 
-                <textarea className="topic-description" placeholder="Description..." value={selectedTopic.description} onChange={(e) => updateTopic('description', e.target.value)} />
+            <div className="qr">{due.length>0?<button className="pulse" onClick={()=>{setQuizMode(true);setQuizIdx(0);setShowAns(false)}}>Review {due.length} cards</button>:<span>🎉 All caught up!</span>}</div>
+          </div>:<div className="es"><p>Select or create a topic</p><button onClick={()=>setShowModal('template')}>Get Started</button></div>}
+        </div>}
 
-                {selectedTopic.resources?.length > 0 && (
-                  <section className="topic-section resources-section">
-                    <h3>📎 Resources</h3>
-                    <div className="resources-grid">
-                      {selectedTopic.resources.map(r => (
-                        <a key={r.id} href={r.url} target="_blank" rel="noreferrer" className="resource-card">
-                          <span className="resource-type">{r.type}</span>
-                          <span className="resource-title">{r.title}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                <div className="topic-sections">
-                  <section className="topic-section">
-                    <h3>❓ Entry Questions</h3>
-                    {selectedTopic.entryQuestions.map(q => <div key={q.id} className="entry-question">❓ {q.text}</div>)}
-                    <button className="add-btn" onClick={addEntryQuestion}>+ Add Question</button>
-                  </section>
-
-                  <section className="topic-section positions-section">
-                    <h3>🎯 My Positions</h3>
-                    <div className="positions-list">
-                      {Object.entries(selectedTopic.positions).map(([key, value]) => (
-                        <div key={key} className="position-card">
-                          <div className="position-header">
-                            <span className="position-icon">{key === 'morality' ? '⚖️' : key === 'meaning' ? '🎯' : '💭'}</span>
-                            <span className="position-label">{key}</span>
-                          </div>
-                          <div 
-                            className="position-content" 
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => updatePosition(key, e.target.innerText)}
-                          >
-                            {value}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <button className="add-btn" onClick={() => {
-                      const key = prompt('Position name (e.g., free will, consciousness):')
-                      if (key) updatePosition(key, 'Your position...')
-                    }}>+ Add Position</button>
-                  </section>
-
-                  <section className="topic-section">
-                    <h3>💡 Key Ideas</h3>
-                    {selectedTopic.keyIdeas.map((idea, idx) => (
-                      <div key={idea.id} className="key-idea"><span className="idea-number">{idx + 1}</span><span>{idea.text}</span></div>
-                    ))}
-                    <button className="add-btn" onClick={addKeyIdea}>+ Add Key Idea</button>
-                  </section>
-                </div>
-
-                <section className="phases-section">
-                  <h3>📊 Phases</h3>
-                  <div className="phases-track">
-                    {selectedTopic.phases?.map((phase, idx) => (
-                      <div key={phase.id} className={`phase-step ${phase.status}`}>
-                        <div className="phase-dot">{phase.status === 'complete' ? '✓' : idx + 1}</div>
-                        <span className="phase-name">{phase.name}</span>
-                        <select value={phase.status} onChange={(e) => {
-                          const updated = selectedTopic.phases.map(p => p.id === phase.id ? { ...p, status: e.target.value } : p)
-                          updateTopic('phases', updated)
-                        }}>
-                          <option value="pending">Pending</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="complete">Complete</option>
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                <div className="quick-review">
-                  {getDueCards().length > 0 ? (
-                    <button className="review-btn pulse" onClick={() => { setQuizMode(true); setQuizCardIndex(0); setShowAnswer(false); }}>
-                      Review {getDueCards().length} cards due
-                    </button>
-                  ) : (
-                    <p className="all-caught-up">🎉 All caught up for this topic!</p>
-                  )}
-                </div>
+        {tab==='review' && <div className="rv">
+          <select value={topic?.id||''} onChange={e=>setTopic(data.topics.find(t=>t.id===e.target.value)||null)}>
+            <option value="">Select topic...</option>
+            {data.topics.map(t=><option key={t.id} value={t.id}>{t.name} ({data.cards.filter(c=>c.topicId===t.id && c.nextReview<=Date.now()).length} due)</option>)}
+          </select>
+          
+          {topic && quizMode ? (() => {
+            const dc = data.cards.filter(c=>c.topicId===topic.id && c.nextReview<=Date.now())
+            if (!dc.length) return <div className="nc">No cards due!</div>
+            const c = dc[quizIdx]||dc[0]
+            return <div className="fc">
+              <div className="cp">{quizIdx+1}/{dc.length}</div>
+              <div className="cc">
+                <div className="cf"><b>Q</b><p>{c.front}</p></div>
+                {showAns && <div className="cb"><b>A</b><p>{c.back}</p></div>}
               </div>
-            ) : (
-              <div className="empty-state">
-                <p>Select a topic or create a new one</p>
-                <button className="start-btn" onClick={() => setShowTemplateModal(true)}>Get Started</button>
+              <div className="ca">
+                {!showAns?<button onClick={()=>setShowAns(true)}>Show</button>:<><button onClick={()=>grade(c.id,1)}>Again</button><button onClick={()=>grade(c.id,3)}>Good</button><button onClick={()=>grade(c.id,5)}>Easy</button></>}
               </div>
-            )}
+              <div className="cm">
+                <button onClick={()=>cloneCard(c.id)}>Clone</button>
+                <button onClick={()=>delCard(c.id)}>Delete</button>
+              </div>
+            </div>
+          })() : topic && <div className="ac">
+            <h3>Add Card</h3>
+            <input id="f" placeholder="Front" /><textarea id="b" placeholder="Back" />
+            <button onClick={()=>addCard(document.getElementById('f').value,document.getElementById('b').value)}>Add</button>
+            <button onClick={()=>{const t=prompt('Paste (Q | A):');if(t){const [f,b]=t.split('|');if(f&&b)addCard(f.trim(),b.trim())}}}>Bulk Import</button>
+          </div>}
+          
+          {topic && <div className="allc"><h4>All Cards</h4>{data.cards.filter(c=>c.topicId===topic.id).map(c=><div key={c.id}><span>{c.front.slice(0,40)}...</span><b className={c.nextReview<=Date.now()?'due':'ok'}>{c.nextReview<=Date.now()?'Due':'OK'}</b></div>)}</div>}
+        </div>}
+
+        {tab==='stats' && <div className="st">
+          <h2>📊 Statistics</h2>
+          <div className="sg">
+            <div><b>{data.topics.length}</b><span>Topics</span></div>
+            <div><b>{data.cards.length}</b><span>Cards</span></div>
+            <div><b>{allDue.length}</b><span>Due</span></div>
+            <div><b>{data.cards.filter(c=>c.interval>7).length}</b><span>Mastered</span></div>
+            <div><b>{data.badges.streakDays}</b><span>Streak</span></div>
+            <div><b>{data.badges.quotesSaved}</b><span>Quotes</span></div>
           </div>
-        )}
+          <div className="cht"><ResponsiveContainer><BarChart data={[{n:'New',c:data.cards.filter(x=>x.interval===1).length},{n:'Learn',c:data.cards.filter(x=>x.interval>1&&x.interval<=7).length},{n:'Review',c:data.cards.filter(x=>x.interval>7&&x.interval<=30).length},{n:'Master',c:data.cards.filter(x=>x.interval>30).length}]}><XAxis dataKey="n"/><Tooltip/><Bar dataKey="c" fill="#6366f1"/></BarChart></ResponsiveContainer></div>
+          <button className="exbtn" onClick={()=>setShowModal('export')}>📥 Export / Import</button>
+        </div>}
 
-        {activeTab === 'review' && (
-          <div className="review-view">
-            <div className="review-header">
-              <h2>🧠 Spaced Repetition</h2>
-              <select value={selectedTopic?.id || ''} onChange={(e) => { const topic = data.topics.find(t => t.id === e.target.value); setSelectedTopic(topic); }}>
-                <option value="">All Topics</option>
-                {data.topics.map(t => (
-                  <option key={t.id} value={t.id}>{t.name} ({data.cards.filter(c => c.topicId === t.id && c.nextReview <= Date.now()).length} due)</option>
-                ))}
-              </select>
-            </div>
-
-            {selectedTopic && quizMode ? (
-              <div className="quiz-mode">
-                {(() => {
-                  const topicCards = data.cards.filter(c => c.topicId === selectedTopic.id && c.nextReview <= Date.now())
-                  if (topicCards.length === 0) { return <div className="no-cards">No cards due for review!</div> }
-                  const card = topicCards[quizCardIndex] || topicCards[0]
-                  return (
-                    <div className="flashcard">
-                      <div className="card-progress">{quizCardIndex + 1} / {topicCards.length} due</div>
-                      <div className="card-content">
-                        <div className="card-front"><span className="card-label">Question</span><p>{card.front}</p></div>
-                        {showAnswer && <div className="card-back"><span className="card-label">Answer</span><p>{card.back}</p></div>}
-                      </div>
-                      <div className="card-actions">
-                        {!showAnswer ? (
-                          <button className="show-answer-btn" onClick={() => setShowAnswer(true)}>Show Answer</button>
-                        ) : (
-                          <><button className="grade-btn hard" onClick={() => gradeCard(card.id, 1)}>Again</button>
-                          <button className="grade-btn good" onClick={() => gradeCard(card.id, 3)}>Good</button>
-                          <button className="grade-btn easy" onClick={() => gradeCard(card.id, 5)}>Easy</button></>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-            ) : (
-              <div className="add-card-area">
-                <h3>{quickAddMode ? 'Quick Add Cards' : 'Add New Card'}</h3>
-                {quickAddMode ? (
-                  <div className="quick-add-form">
-                    {[1, 2, 3].map(n => (
-                      <div key={n} className="quick-add-row">
-                        <input id={`qfront${n}`} placeholder="Question" />
-                        <span className="divider">|</span>
-                        <input id={`qback${n}`} placeholder="Answer" />
-                      </div>
-                    ))}
-                    <button className="add-cards-btn" onClick={() => {
-                      [1, 2, 3].forEach(n => {
-                        const front = document.getElementById(`qfront${n}`)?.value
-                        const back = document.getElementById(`qback${n}`)?.value
-                        if (front && back) addCard(front, back)
-                      })
-                      setQuickAddMode(false)
-                    }}>Add All</button>
-                    <button className="cancel-quick" onClick={() => setQuickAddMode(false)}>Cancel</button>
-                  </div>
-                ) : (
-                  <div className="add-card-form">
-                    <input id="newFront" placeholder="Front (question)" />
-                    <textarea id="newBack" placeholder="Back (answer)" />
-                    <div className="add-card-actions">
-                      <button className="quick-add-btn" onClick={() => { const front = document.getElementById('newFront')?.value; const back = document.getElementById('newBack')?.value; if (front && back) { addCard(front, back); document.getElementById('newFront').value = ''; document.getElementById('newBack').value = ''; } }}>Add Card</button>
-                      <button className="bulk-btn" onClick={() => setQuickAddMode(true)}>Quick Add (+3)</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {selectedTopic && (
-              <div className="all-cards-preview">
-                <h4>All Cards for {selectedTopic.name}</h4>
-                <div className="cards-list">
-                  {data.cards.filter(c => c.topicId === selectedTopic.id).map(card => (
-                    <div key={card.id} className="mini-card">
-                      <span className="mini-card-front">{card.front.slice(0, 40)}...</span>
-                      <span className={`mini-card-status ${card.nextReview <= Date.now() ? 'due' : 'ok'}`}>{card.nextReview <= Date.now() ? 'Due' : 'OK'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'stats' && (
-          <div className="stats-view">
-            <h2>📊 Learning Statistics</h2>
-            <div className="stats-grid">
-              <div className="stat-card"><span className="stat-number">{data.topics.length}</span><span className="stat-label">Topics</span></div>
-              <div className="stat-card"><span className="stat-number">{data.cards.length}</span><span className="stat-label">Cards</span></div>
-              <div className="stat-card"><span className="stat-number">{data.cards.filter(c => c.nextReview <= Date.now()).length}</span><span className="stat-label">Due Today</span></div>
-              <div className="stat-card"><span className="stat-number">{data.cards.filter(c => c.interval > 7).length}</span><span className="stat-label">Mastered</span></div>
-              <div className="stat-card"><span className="stat-number">{data.badges.streakDays}</span><span className="stat-label">Day Streak</span></div>
-              <div className="stat-card"><span className="stat-number">{data.badges.totalReviews || data.cards.reduce((a, c) => a + (c.reviews || 0), 0)}</span><span className="stat-label">Total Reviews</span></div>
-            </div>
-
-            <div className="charts-row">
-              <div className="chart-card">
-                <h3>Cards Mastery Level</h3>
-                <ResponsiveContainer width="100%" height={150}>
-                  <BarChart data={[
-                    { name: 'New', count: data.cards.filter(c => c.interval === 1).length },
-                    { name: 'Learning', count: data.cards.filter(c => c.interval > 1 && c.interval <= 7).length },
-                    { name: 'Reviewing', count: data.cards.filter(c => c.interval > 7 && c.interval <= 30).length },
-                    { name: 'Mastered', count: data.cards.filter(c => c.interval > 30).length }
-                  ]}>
-                    <XAxis dataKey="name" /><Tooltip /><Bar dataKey="count" fill="#6366f1" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="chart-card">
-                <h3>Topics Progress</h3>
-                <div className="topic-progress-bars">
-                  {data.topics.map(t => (
-                    <div key={t.id} className="topic-progress-row">
-                      <span className="topic-progress-icon">{t.icon}</span>
-                      <span className="topic-progress-name">{t.name}</span>
-                      <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${(t.phases?.filter(p => p.status === 'complete').length || 0) / (t.phases?.length || 1) * 100}%` }} />
-                      </div>
-                      <span className="progress-pct">{Math.round((t.phases?.filter(p => p.status === 'complete').length || 0) / (t.phases?.length || 1) * 100)}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="export-bar">
-              <button className="export-main-btn" onClick={() => setExportModal(true)}>📥 Export / Import Data</button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="settings-view">
-            <h2>⚙️ Settings</h2>
-            <div className="settings-section">
-              <div className="setting-item">
-                <label>Dark Mode</label>
-                <button className={`toggle ${data.settings.darkMode ? 'on' : 'off'}`} onClick={() => setData({ ...data, settings: { ...data.settings, darkMode: !data.settings.darkMode } })}>
-                  {data.settings.darkMode ? '🌙' : '☀️'}
-                </button>
-              </div>
-              <div className="setting-item">
-                <label>Daily Review Goal</label>
-                <input type="number" value={data.settings.dailyGoal} onChange={(e) => setData({ ...data, settings: { ...data.settings, dailyGoal: parseInt(e.target.value) } })} />
-              </div>
-            </div>
-            <div className="badges-section">
-              <h3>🏆 Achievements</h3>
-              <div className="badges-grid">
-                <div className="badge"><span className="badge-icon">📚</span><span>Topics: {data.badges.topicsCreated}</span></div>
-                <div className="badge"><span className="badge-icon">🃏</span><span>Cards: {data.badges.totalCards}</span></div>
-                <div className="badge"><span className="badge-icon">🔥</span><span>Streak: {data.badges.streakDays} days</span></div>
-                <div className="badge"><span className="badge-icon">✅</span><span>Reviews: {data.badges.totalReviews || data.cards.reduce((a, c) => a + (c.reviews || 0), 0)}</span></div>
-              </div>
-            </div>
-          </div>
-        )}
+        {tab==='tools' && <div className="tl">
+          <h2>⚙️ Settings</h2>
+          <label><span>Dark Mode</span><button onClick={()=>setData(d=>({...d,settings:{...d.settings,darkMode:!d.settings.darkMode}}))}>{data.settings.darkMode?'🌙':'☀️'}</button></label>
+          <label><span>Keyboard Shortcuts</span><button onClick={()=>setData(d=>({...d,settings:{...d.settings,keyboardShortcuts:!d.settings.keyboardShortcuts}}))}>{data.settings.keyboardShortcuts?'✅':'⬜'}</button></label>
+          <div className="kb"><h3>⌨️ Shortcuts</h3><ul><li>Ctrl+F - Search</li><li>Ctrl+N - New Topic</li><li>Ctrl+Z - Undo</li></ul></div>
+        </div>}
       </main>
     </div>
   )
 }
-
-export default App
